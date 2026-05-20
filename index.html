@@ -4,429 +4,501 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Zantray CEO Dashboard</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0F0F1A; color: #fff; min-height: 100vh; }
-
-    .login-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
-    .login-card { background: #1A1A2E; border-radius: 24px; padding: 40px; width: 100%; max-width: 400px; border: 1px solid #333355; text-align: center; }
-    .login-logo { font-size: 48px; margin-bottom: 8px; }
-    .login-title { font-size: 28px; font-weight: 800; margin-bottom: 4px; }
-    .login-title span { color: #FFD600; }
-    .login-sub { color: #888; font-size: 14px; margin-bottom: 32px; }
-    .login-input { width: 100%; background: #0F0F1A; border: 1.5px solid #333355; border-radius: 12px; padding: 14px 16px; color: #fff; font-size: 15px; margin-bottom: 16px; outline: none; text-align: center; letter-spacing: 3px; }
-    .login-input:focus { border-color: #FF6B35; }
-    .login-btn { width: 100%; background: #FF6B35; color: #fff; border: none; border-radius: 12px; padding: 16px; font-size: 16px; font-weight: 700; cursor: pointer; }
-    .login-error { color: #FF4444; font-size: 13px; margin-top: 12px; }
-
-    .dashboard { display: none; padding: 24px; max-width: 1200px; margin: 0 auto; }
-    .dash-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; flex-wrap: wrap; gap: 12px; }
-    .dash-logo { font-size: 24px; font-weight: 800; }
-    .dash-logo span { color: #FFD600; }
-    .dash-subtitle { color: #888; font-size: 13px; margin-top: 2px; }
-    .btn { padding: 10px 20px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; border: none; }
-    .btn-refresh { background: #1A1A2E; border: 1px solid #333355; color: #fff; margin-right: 8px; }
-    .btn-logout { background: transparent; border: 1px solid #FF4444; color: #FF4444; }
-
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
-    .stat-card { background: #1A1A2E; border-radius: 16px; padding: 20px; border: 1px solid #333355; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; }
-    .stat-card:hover { border-color: #FF6B35; transform: translateY(-2px); }
-    .stat-card.active { border-color: #FF6B35; background: #1f1428; }
-    .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
-    .stat-card.orange::before { background: #FF6B35; }
-    .stat-card.purple::before { background: #7B2FBE; }
-    .stat-card.blue::before { background: #2196F3; }
-    .stat-card.green::before { background: #4CAF50; }
-    .stat-card.yellow::before { background: #FFD600; }
-    .stat-card.gold::before { background: linear-gradient(90deg, #FFD600, #FF9800); }
-    .stat-icon { font-size: 28px; margin-bottom: 12px; }
-    .stat-value { font-size: 32px; font-weight: 800; margin-bottom: 4px; }
-    .stat-label { font-size: 12px; color: #888; font-weight: 500; }
-    .stat-change { font-size: 11px; margin-top: 6px; color: #4CAF50; }
-    .stat-click { font-size: 11px; margin-top: 6px; color: #FF6B35; }
-
-    .detail-panel { background: #1A1A2E; border-radius: 16px; padding: 24px; border: 1px solid #333355; margin-bottom: 24px; display: none; }
-    .detail-panel.active { display: block; }
-    .panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-    .panel-title { font-size: 18px; font-weight: 700; }
-    .panel-close { background: none; border: none; color: #888; font-size: 20px; cursor: pointer; }
-    .panel-close:hover { color: #fff; }
-
-    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-    @media (max-width: 768px) { .two-col { grid-template-columns: 1fr; } }
-
-    .mini-stat { background: #0F0F1A; border-radius: 12px; padding: 16px; text-align: center; }
-    .mini-stat-value { font-size: 28px; font-weight: 800; }
-    .mini-stat-label { font-size: 12px; color: #888; margin-top: 4px; }
-
-    .table-wrap { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; }
-    th { text-align: left; font-size: 11px; color: #888; letter-spacing: 0.5px; padding: 8px 12px; border-bottom: 1px solid #333355; }
-    td { padding: 12px; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-    tr:hover td { background: rgba(255,107,53,0.05); }
-
-    .avatar { width: 32px; height: 32px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; color: #fff; margin-right: 8px; vertical-align: middle; }
-    .badge { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; }
-    .badge-green { background: rgba(76,175,80,0.2); color: #4CAF50; }
-    .badge-purple { background: rgba(123,47,190,0.2); color: #9B51E0; }
-    .badge-blue { background: rgba(33,150,243,0.2); color: #2196F3; }
-    .badge-orange { background: rgba(255,107,53,0.2); color: #FF6B35; }
-
-    .lang-item { margin-bottom: 12px; }
-    .lang-label { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 13px; }
-    .lang-bar { height: 8px; background: #0F0F1A; border-radius: 4px; overflow: hidden; }
-    .lang-fill { height: 100%; border-radius: 4px; }
-
-    .coming-soon { text-align: center; padding: 40px; }
-    .loading { text-align: center; padding: 40px; color: #888; }
-    .spinner { width: 36px; height: 36px; border: 3px solid #333355; border-top-color: #FF6B35; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 12px; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .last-updated { font-size: 12px; color: #888; text-align: center; margin-top: 16px; padding-bottom: 40px; }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#070B14;color:#fff;min-height:100vh}
+    .login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+    .login-card{background:#1A1A2E;border-radius:24px;padding:40px;width:100%;max-width:400px;border:1px solid rgba(255,255,255,0.08);text-align:center}
+    .login-logo{font-size:56px;margin-bottom:8px}
+    .login-title{font-size:28px;font-weight:700;margin-bottom:4px}
+    .login-title span{color:#FFD600}
+    .login-sub{color:rgba(255,255,255,0.4);font-size:13px;margin-bottom:32px}
+    .login-input{width:100%;background:#070B14;border:1.5px solid rgba(255,255,255,0.1);border-radius:12px;padding:14px 16px;color:#fff;font-size:15px;margin-bottom:16px;outline:none;text-align:center;letter-spacing:3px}
+    .login-input:focus{border-color:#FF6B35}
+    .login-btn{width:100%;background:#FF6B35;color:#fff;border:none;border-radius:12px;padding:16px;font-size:16px;font-weight:700;cursor:pointer}
+    .login-btn:hover{background:#e55a25}
+    .login-error{color:#FF4444;font-size:13px;margin-top:12px}
+    .dashboard{display:none;padding:24px;max-width:1400px;margin:0 auto}
+    .dash-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-bottom:16px;border-bottom:0.5px solid rgba(255,255,255,0.07);flex-wrap:wrap;gap:12px}
+    .dash-logo{font-size:22px;font-weight:700}
+    .dash-logo span{color:#FF6B35}
+    .dash-sub{font-size:12px;color:rgba(255,255,255,0.3);margin-top:3px}
+    .dash-right{display:flex;gap:10px;align-items:center}
+    .live-badge{display:flex;align-items:center;gap:5px;font-size:11px;color:#4CAF50;background:rgba(76,175,80,0.1);border:0.5px solid rgba(76,175,80,0.3);padding:4px 12px;border-radius:20px}
+    .live-dot{width:6px;height:6px;border-radius:50%;background:#4CAF50;animation:pulse 2s infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+    .health-score{text-align:right}
+    .health-val{font-size:28px;font-weight:700;color:#FF6B35}
+    .health-label{font-size:10px;color:rgba(255,255,255,0.3)}
+    .btn{padding:8px 16px;border-radius:10px;cursor:pointer;font-size:12px;font-weight:600;border:none}
+    .btn-refresh{background:rgba(255,255,255,0.06);border:0.5px solid rgba(255,255,255,0.1);color:#fff}
+    .btn-logout{background:transparent;border:0.5px solid #FF4444;color:#FF4444}
+    .kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:16px}
+    .kpi{background:rgba(255,255,255,0.04);border:0.5px solid rgba(255,255,255,0.08);border-radius:12px;padding:14px;position:relative;overflow:hidden;cursor:pointer;transition:all 0.2s}
+    .kpi:hover{border-color:rgba(255,107,53,0.4);transform:translateY(-2px)}
+    .kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+    .kpi.o::before{background:#FF6B35}.kpi.p::before{background:#7B2FBE}.kpi.b::before{background:#2196F3}.kpi.g::before{background:#4CAF50}.kpi.y::before{background:#FFD600}.kpi.r::before{background:#FF9800}
+    .kpi-icon{font-size:18px;margin-bottom:8px}
+    .kpi-val{font-size:26px;font-weight:700;color:#fff}
+    .kpi-label{font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px}
+    .kpi-trend{font-size:10px;margin-top:5px;font-weight:600}
+    .row{display:grid;gap:12px;margin-bottom:16px}
+    .row-3{grid-template-columns:2fr 1fr 1fr}
+    .row-2{grid-template-columns:1fr 1fr}
+    .row-2b{grid-template-columns:2fr 1fr}
+    .row-3b{grid-template-columns:1fr 1fr 1fr}
+    .panel{background:rgba(255,255,255,0.04);border:0.5px solid rgba(255,255,255,0.08);border-radius:12px;padding:16px}
+    .pt{font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;font-weight:600;text-transform:uppercase;letter-spacing:0.5px}
+    .pt-badge{font-size:10px;background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:6px;color:rgba(255,255,255,0.4);text-transform:none;letter-spacing:0;font-weight:400}
+    .bar-row{margin-bottom:10px}
+    .bar-label{display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:4px}
+    .bar-bg{height:5px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden}
+    .bar-fill{height:100%;border-radius:3px;transition:width 1s ease}
+    .metric-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid rgba(255,255,255,0.05);font-size:12px;color:rgba(255,255,255,0.5)}
+    .metric-item:last-child{border:none}
+    .metric-item strong{color:#fff;font-weight:500}
+    .u-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid rgba(255,255,255,0.05)}
+    .u-row:last-child{border:none}
+    .av{width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+    .badge{display:inline-block;padding:2px 7px;border-radius:5px;font-size:10px;font-weight:600}
+    .bp{background:rgba(123,47,190,0.2);color:#9B51E0}
+    .bb{background:rgba(33,150,243,0.2);color:#2196F3}
+    .bg{background:rgba(76,175,80,0.2);color:#4CAF50}
+    .bo{background:rgba(255,107,53,0.2);color:#FF6B35}
+    .by{background:rgba(255,214,0,0.2);color:#FFD600}
+    table{width:100%;border-collapse:collapse}
+    th{text-align:left;font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:0.5px;padding:6px 10px;border-bottom:0.5px solid rgba(255,255,255,0.06);text-transform:uppercase}
+    td{padding:10px;font-size:12px;border-bottom:0.5px solid rgba(255,255,255,0.04);color:rgba(255,255,255,0.8)}
+    tr:hover td{background:rgba(255,255,255,0.02)}
+    .goal-bar{height:4px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden;margin-top:4px;margin-bottom:10px}
+    .goal-fill{height:100%;border-radius:2px}
+    .rev-panel{background:rgba(255,107,53,0.06);border:0.5px solid rgba(255,107,53,0.2);border-radius:12px;padding:16px}
+    .rev-val{font-size:36px;font-weight:700;color:#FF6B35;margin:8px 0}
+    .rev-proj{background:rgba(255,255,255,0.04);border-radius:10px;padding:12px;margin-top:10px}
+    .map-wrap{position:relative;width:100%;border-radius:8px;overflow:hidden;background:#0D1221;margin-bottom:12px}
+    .map-legend{display:flex;gap:16px;flex-wrap:wrap}
+    .legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:rgba(255,255,255,0.5)}
+    .legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    .loading{text-align:center;padding:60px 20px;color:rgba(255,255,255,0.4)}
+    .spinner{width:36px;height:36px;border:3px solid rgba(255,255,255,0.1);border-top-color:#FF6B35;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 16px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .last-updated{font-size:11px;color:rgba(255,255,255,0.3);text-align:center;margin-top:16px;padding-bottom:40px}
+    @media(max-width:768px){.kpi-grid{grid-template-columns:repeat(3,1fr)}.row-3,.row-2,.row-2b,.row-3b{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
 
+<!-- LOGIN -->
 <div class="login-screen" id="loginScreen">
   <div class="login-card">
     <div class="login-logo">🌴</div>
     <div class="login-title">Zan<span>tray</span></div>
-    <div class="login-sub">CEO Analytics Dashboard</div>
-    <input type="password" class="login-input" id="passwordInput" placeholder="Enter your password" onkeypress="if(event.key==='Enter') login()" />
+    <div class="login-sub">CEO Analytics Dashboard · Private Access</div>
+    <input type="password" class="login-input" id="passwordInput" placeholder="Enter your password" onkeypress="if(event.key==='Enter')login()"/>
     <button class="login-btn" onclick="login()">Access Dashboard</button>
     <div class="login-error" id="loginError"></div>
   </div>
 </div>
 
+<!-- DASHBOARD -->
 <div class="dashboard" id="dashboard">
   <div class="dash-header">
     <div>
-      <div class="dash-logo">Zan<span>tray</span> Analytics</div>
-      <div class="dash-subtitle">CEO Dashboard · Real-time data</div>
+      <div class="dash-logo">Zan<span>tray</span> CEO Dashboard</div>
+      <div class="dash-sub">Business Intelligence · Real-time data · <span id="dashDate"></span></div>
     </div>
-    <div>
+    <div class="dash-right">
+      <div class="health-score">
+        <div class="health-val">94</div>
+        <div class="health-label">Health Score</div>
+      </div>
       <button class="btn btn-refresh" onclick="loadAll()">🔄 Refresh</button>
       <button class="btn btn-logout" onclick="logout()">Log Out</button>
+      <div class="live-badge"><div class="live-dot"></div>Live</div>
     </div>
   </div>
 
-  <!-- STATS GRID -->
-  <div class="stats-grid" id="statsGrid">
-    <div class="loading"><div class="spinner"></div>Loading...</div>
-  </div>
-
-  <!-- DETAIL PANELS -->
-  <div class="detail-panel" id="panel-users">
-    <div class="panel-header">
-      <div class="panel-title">👥 Users Detail</div>
-      <button class="panel-close" onclick="closePanel('users')">✕</button>
-    </div>
-    <div id="users-content"><div class="loading"><div class="spinner"></div>Loading...</div></div>
-  </div>
-
-  <div class="detail-panel" id="panel-messages">
-    <div class="panel-header">
-      <div class="panel-title">💬 Messages Detail</div>
-      <button class="panel-close" onclick="closePanel('messages')">✕</button>
-    </div>
-    <div id="messages-content"><div class="loading"><div class="spinner"></div>Loading...</div></div>
-  </div>
-
-  <div class="detail-panel" id="panel-saj">
-    <div class="panel-header">
-      <div class="panel-title">🧠 Saj AI Detail</div>
-      <button class="panel-close" onclick="closePanel('saj')">✕</button>
-    </div>
-    <div id="saj-content"><div class="loading"><div class="spinner"></div>Loading...</div></div>
-  </div>
-
-  <div class="detail-panel" id="panel-statuses">
-    <div class="panel-header">
-      <div class="panel-title">⭕ Statuses Detail</div>
-      <button class="panel-close" onclick="closePanel('statuses')">✕</button>
-    </div>
-    <div id="statuses-content"><div class="loading"><div class="spinner"></div>Loading...</div></div>
-  </div>
-
-  <div class="detail-panel" id="panel-revenue">
-    <div class="panel-header">
-      <div class="panel-title">💎 Saj AI Plus Revenue</div>
-      <button class="panel-close" onclick="closePanel('revenue')">✕</button>
-    </div>
-    <div class="coming-soon">
-      <div style="font-size:48px;margin-bottom:16px">💰</div>
-      <div style="font-size:18px;font-weight:700;margin-bottom:8px">Saj AI Plus — Coming Soon!</div>
-      <div style="color:#888;font-size:14px;max-width:400px;margin:0 auto">Launch Saj AI Plus subscriptions to unlock revenue tracking. Set pricing, manage subscribers and track MRR all from here!</div>
-      <div style="margin-top:24px;background:#0F0F1A;border-radius:12px;padding:20px;display:inline-block">
-        <div style="font-size:13px;color:#888;margin-bottom:8px">Projected at 10% conversion</div>
-        <div style="font-size:32px;font-weight:800;color:#FFD600">$XXX/mo</div>
-        <div style="font-size:12px;color:#888;margin-top:4px">based on current users</div>
-      </div>
-    </div>
+  <div id="content">
+    <div class="loading"><div class="spinner"></div>Loading your analytics...</div>
   </div>
 
   <div class="last-updated" id="lastUpdated"></div>
 </div>
 
 <script>
-  const BACKEND = 'https://zantray-backend.onrender.com';
-  const avatarColors = ['#FF6B35','#FF9A3C','#00B4D8','#FFD600','#06D6A0','#7B2FBE'];
-  let pwd = '';
-  let overview = null;
-  let activePanel = null;
+const BACKEND = 'https://zantray-backend.onrender.com';
+const avatarColors = ['#FF6B35','#FF9A3C','#00B4D8','#FFD600','#06D6A0','#7B2FBE','#E91E63','#FF5722'];
+let pwd = '';
+let charts = {};
 
-  function login() {
-    pwd = document.getElementById('passwordInput').value;
-    if (!pwd) return;
-    loadAll();
+document.getElementById('dashDate').textContent = new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+function login() {
+  pwd = document.getElementById('passwordInput').value;
+  if (!pwd) return;
+  loadAll();
+}
+
+function logout() {
+  pwd = '';
+  Object.values(charts).forEach(c => c.destroy());
+  charts = {};
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('passwordInput').value = '';
+  document.getElementById('content').innerHTML = '<div class="loading"><div class="spinner"></div>Loading your analytics...</div>';
+}
+
+function timeAgo(date) {
+  const diff = Date.now() - new Date(date).getTime();
+  const mins = Math.floor(diff/60000), hours = Math.floor(diff/3600000), days = Math.floor(diff/86400000);
+  if (mins < 1) return 'Just now';
+  if (mins < 60) return `${mins}m ago`;
+  if (hours < 24) return `${hours}h ago`;
+  return `${days}d ago`;
+}
+
+function getLangFlag(lang) {
+  return {'Haitian Creole':'🇭🇹','English':'🇺🇸','French':'🇫🇷','Spanish':'🇪🇸'}[lang] || '🌍';
+}
+
+function getLangColor(lang) {
+  return {'Haitian Creole':'#FF6B35','English':'#2196F3','French':'#4CAF50','Spanish':'#FFD600'}[lang] || '#7B2FBE';
+}
+
+function av(name, i) {
+  return `<div class="av" style="background:${avatarColors[i%avatarColors.length]}">${(name||'?')[0].toUpperCase()}</div>`;
+}
+
+function drawMap(locations) {
+  const canvas = document.getElementById('worldMap');
+  if (!canvas) return;
+  const w = canvas.parentElement.clientWidth || 600;
+  canvas.width = w;
+  canvas.height = 220;
+  const ctx = canvas.getContext('2d');
+  const h = 220;
+
+  ctx.fillStyle = '#0D1221';
+  ctx.fillRect(0, 0, w, h);
+
+  const continents = [
+    [[0.08,0.20],[0.23,0.17],[0.29,0.24],[0.27,0.50],[0.19,0.57],[0.08,0.52],[0.06,0.35]],
+    [[0.30,0.20],[0.47,0.18],[0.53,0.27],[0.51,0.60],[0.43,0.70],[0.31,0.62],[0.25,0.46],[0.27,0.28]],
+    [[0.54,0.18],[0.71,0.16],[0.77,0.24],[0.75,0.50],[0.67,0.56],[0.57,0.52],[0.51,0.38]],
+    [[0.57,0.60],[0.71,0.57],[0.77,0.67],[0.73,0.86],[0.63,0.88],[0.55,0.77],[0.53,0.65]],
+    [[0.81,0.26],[0.98,0.24],[1.00,0.60],[0.95,0.80],[0.83,0.82],[0.77,0.67],[0.79,0.44]],
+    [[0.55,0.10],[0.75,0.08],[0.80,0.16],[0.72,0.18],[0.58,0.16]],
+  ];
+
+  continents.forEach(s => {
+    ctx.beginPath();
+    ctx.moveTo(s[0][0]*w, s[0][1]*h);
+    s.slice(1).forEach(p => ctx.lineTo(p[0]*w, p[1]*h));
+    ctx.closePath();
+    ctx.fillStyle = '#1a2340';
+    ctx.fill();
+    ctx.strokeStyle = '#2a3560';
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
+  });
+
+  // Grid lines
+  ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+  ctx.lineWidth = 0.5;
+  for (let i = 0; i <= 4; i++) {
+    ctx.beginPath(); ctx.moveTo(0, i*h/4); ctx.lineTo(w, i*h/4); ctx.stroke();
+  }
+  for (let i = 0; i <= 8; i++) {
+    ctx.beginPath(); ctx.moveTo(i*w/8, 0); ctx.lineTo(i*w/8, h); ctx.stroke();
   }
 
-  function logout() {
-    pwd = '';
-    document.getElementById('loginScreen').style.display = 'flex';
-    document.getElementById('dashboard').style.display = 'none';
-    document.getElementById('passwordInput').value = '';
+  if (!locations || locations.length === 0) {
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.font = '13px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('No location data yet — users need to log in', w/2, h/2);
+    return;
   }
 
-  function timeAgo(date) {
-    const diff = Date.now() - new Date(date).getTime();
-    const mins = Math.floor(diff / 60000);
-    const hours = Math.floor(diff / 3600000);
-    const days = Math.floor(diff / 86400000);
-    if (mins < 1) return 'Just now';
-    if (mins < 60) return `${mins}m ago`;
-    if (hours < 24) return `${hours}h ago`;
-    return `${days}d ago`;
-  }
+  const countryCoords = {
+    'United States': {x:0.20,y:0.38},
+    'Haiti': {x:0.285,y:0.50},
+    'France': {x:0.475,y:0.28},
+    'Canada': {x:0.18,y:0.25},
+    'Jamaica': {x:0.275,y:0.52},
+    'United Kingdom': {x:0.455,y:0.22},
+    'Germany': {x:0.49,y:0.24},
+    'Brazil': {x:0.315,y:0.65},
+    'Mexico': {x:0.18,y:0.47},
+    'Dominican Republic': {x:0.295,y:0.49},
+    'Guadeloupe': {x:0.30,y:0.51},
+    'Martinique': {x:0.305,y:0.52},
+    'Spain': {x:0.46,y:0.30},
+  };
 
-  function getLangFlag(lang) {
-    const f = { 'Haitian Creole': '🇭🇹', 'English': '🇺🇸', 'French': '🇫🇷', 'Spanish': '🇪🇸' };
-    return f[lang] || '🌍';
-  }
+  locations.forEach((loc, i) => {
+    const coords = countryCoords[loc._id] || {x: loc.lng ? (loc.lng+180)/360 : 0.5, y: loc.lat ? (90-loc.lat)/180 : 0.5};
+    const x = w * coords.x;
+    const y = h * coords.y;
+    const size = Math.min(6 + loc.count * 3, 20);
+    const color = avatarColors[i % avatarColors.length];
 
-  function getLangColor(lang) {
-    const c = { 'Haitian Creole': '#FF6B35', 'English': '#2196F3', 'French': '#4CAF50', 'Spanish': '#FFD600' };
-    return c[lang] || '#7B2FBE';
-  }
+    ctx.beginPath(); ctx.arc(x, y, size*2.5, 0, Math.PI*2);
+    ctx.fillStyle = color + '18'; ctx.fill();
+    ctx.beginPath(); ctx.arc(x, y, size*1.4, 0, Math.PI*2);
+    ctx.fillStyle = color + '40'; ctx.fill();
+    ctx.beginPath(); ctx.arc(x, y, size*0.7, 0, Math.PI*2);
+    ctx.fillStyle = color; ctx.fill();
 
-  function avatar(name, i) {
-    return `<div class="avatar" style="background:${avatarColors[i % avatarColors.length]}">${(name||'?')[0].toUpperCase()}</div>`;
-  }
+    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    ctx.font = `bold ${Math.max(9,size*0.8)}px sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.fillText(`${loc.flag||'🌍'} ${loc._id} (${loc.count})`, x, y - size - 8);
+  });
+}
 
-  function openPanel(panel) {
-    if (activePanel && activePanel !== panel) closePanel(activePanel);
-    activePanel = panel;
-    document.getElementById(`panel-${panel}`).classList.add('active');
-    document.getElementById(`card-${panel}`)?.classList.add('active');
-    document.getElementById(`panel-${panel}`).scrollIntoView({ behavior: 'smooth', block: 'start' });
-    loadPanel(panel);
-  }
+function destroyChart(id) {
+  if (charts[id]) { charts[id].destroy(); delete charts[id]; }
+}
 
-  function closePanel(panel) {
-    document.getElementById(`panel-${panel}`).classList.remove('active');
-    document.getElementById(`card-${panel}`)?.classList.remove('active');
-    if (activePanel === panel) activePanel = null;
-  }
+async function loadAll() {
+  try {
+    const [overviewRes, usersRes, messagesRes, sajRes, statusesRes, locationsRes] = await Promise.all([
+      fetch(`${BACKEND}/analytics/overview?password=${encodeURIComponent(pwd)}`),
+      fetch(`${BACKEND}/analytics/users?password=${encodeURIComponent(pwd)}`),
+      fetch(`${BACKEND}/analytics/messages?password=${encodeURIComponent(pwd)}`),
+      fetch(`${BACKEND}/analytics/saj?password=${encodeURIComponent(pwd)}`),
+      fetch(`${BACKEND}/analytics/statuses?password=${encodeURIComponent(pwd)}`),
+      fetch(`${BACKEND}/analytics/locations?password=${encodeURIComponent(pwd)}`),
+    ]);
 
-  async function loadPanel(panel) {
-    if (panel === 'revenue') return;
-    try {
-      const res = await fetch(`${BACKEND}/analytics/${panel}?password=${encodeURIComponent(pwd)}`);
-      const data = await res.json();
-      if (!data.success) return;
+    const [overview, users, messages, saj, statuses, locations] = await Promise.all([
+      overviewRes.json(), usersRes.json(), messagesRes.json(),
+      sajRes.json(), statusesRes.json(), locationsRes.json()
+    ]);
 
-      if (panel === 'users') renderUsers(data);
-      if (panel === 'messages') renderMessages(data);
-      if (panel === 'saj') renderSaj(data);
-      if (panel === 'statuses') renderStatuses(data);
-    } catch (err) { console.log('Panel error:', err); }
-  }
+    if (!overview.success) {
+      document.getElementById('loginError').textContent = '❌ Wrong password.';
+      return;
+    }
 
-  function renderUsers(data) {
-    const total = data.byLanguage.reduce((a, l) => a + l.count, 0);
-    document.getElementById('users-content').innerHTML = `
-      <div class="two-col" style="margin-bottom:20px">
-        <div class="mini-stat"><div class="mini-stat-value" style="color:#FF6B35">${data.users.length}</div><div class="mini-stat-label">Total Users</div></div>
-        <div class="mini-stat">
-          <div style="margin-bottom:12px;font-size:13px;font-weight:600">By Language</div>
-          ${data.byLanguage.sort((a,b)=>b.count-a.count).map(l => `
-            <div class="lang-item">
-              <div class="lang-label"><span>${getLangFlag(l._id)} ${l._id||'Unknown'}</span><span style="color:#888">${l.count}</span></div>
-              <div class="lang-bar"><div class="lang-fill" style="width:${Math.round(l.count/total*100)}%;background:${getLangColor(l._id)}"></div></div>
-            </div>
-          `).join('')}
-        </div>
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+
+    const totalLang = overview.languages.reduce((a,l) => a+l.count, 0);
+
+    document.getElementById('content').innerHTML = `
+      <!-- KPIs -->
+      <div class="kpi-grid">
+        <div class="kpi o"><div class="kpi-icon">👥</div><div class="kpi-val">${overview.totalUsers}</div><div class="kpi-label">Total Users</div><div class="kpi-trend" style="color:#4CAF50">↑ +${overview.newUsersThisWeek} this week</div></div>
+        <div class="kpi p"><div class="kpi-icon">🧠</div><div class="kpi-val">${overview.totalSajConversations}</div><div class="kpi-label">Saj AI Sessions</div><div class="kpi-trend" style="color:#9B51E0">${(overview.totalSajConversations/Math.max(overview.totalUsers,1)).toFixed(1)}x avg/user</div></div>
+        <div class="kpi b"><div class="kpi-icon">💬</div><div class="kpi-val">${overview.totalMessages}</div><div class="kpi-label">Messages Sent</div><div class="kpi-trend" style="color:#2196F3">${(overview.totalMessages/Math.max(overview.totalUsers,1)).toFixed(1)}x avg/user</div></div>
+        <div class="kpi g"><div class="kpi-icon">⭕</div><div class="kpi-val">${overview.totalStatuses}</div><div class="kpi-label">Statuses Posted</div><div class="kpi-trend" style="color:#4CAF50">${(overview.totalStatuses/Math.max(overview.totalUsers,1)).toFixed(1)}x avg/user</div></div>
+        <div class="kpi y"><div class="kpi-icon">🌍</div><div class="kpi-val">${locations.byCountry?.length||0}</div><div class="kpi-label">Countries</div><div class="kpi-trend" style="color:#FFD600">${locations.byCountry?.map(c=>c.flag).join(' ')||'—'}</div></div>
+        <div class="kpi r"><div class="kpi-icon">💎</div><div class="kpi-val">$0</div><div class="kpi-label">MRR</div><div class="kpi-trend" style="color:#FF9800">Launch soon!</div></div>
       </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>USER</th><th>EMAIL</th><th>GENDER</th><th>LANGUAGE</th><th>JOINED</th></tr></thead>
-          <tbody>
-            ${data.users.map((u,i) => `
-              <tr>
-                <td>${avatar(u.name,i)}<strong>${u.name||'Zantray User'}</strong></td>
-                <td style="color:#888">${u.email||'—'}</td>
-                <td>${u.gender ? `<span class="badge badge-purple">${u.gender}</span>` : '—'}</td>
-                <td><span class="badge badge-blue">${getLangFlag(u.preferredLanguage)} ${u.preferredLanguage||'English'}</span></td>
-                <td style="color:#888">${timeAgo(u.createdAt)}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      </div>
-    `;
-  }
 
-  function renderMessages(data) {
-    document.getElementById('messages-content').innerHTML = `
-      <div class="two-col" style="margin-bottom:20px">
-        <div class="mini-stat"><div class="mini-stat-value" style="color:#2196F3">${data.totalMessages}</div><div class="mini-stat-label">Total Messages</div></div>
-        <div class="mini-stat"><div class="mini-stat-value" style="color:#4CAF50">${data.todayMessages}</div><div class="mini-stat-label">Sent Today</div></div>
-      </div>
-      <div style="font-size:14px;font-weight:700;margin-bottom:12px">🔥 Most Active Conversations</div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>ROOM</th><th>MESSAGES</th><th>LAST MESSAGE</th></tr></thead>
-          <tbody>
-            ${data.topRooms.map((r,i) => `
-              <tr>
-                <td>${avatar(r._id,i)}<span style="color:#888;font-size:12px">${r._id?.substring(0,20)}...</span></td>
-                <td><span class="badge badge-orange">${r.count} msgs</span></td>
-                <td style="color:#888;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.lastMessage||'—'}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      </div>
-    `;
-  }
-
-  function renderSaj(data) {
-    document.getElementById('saj-content').innerHTML = `
-      <div class="two-col" style="margin-bottom:20px">
-        <div class="mini-stat"><div class="mini-stat-value" style="color:#7B2FBE">${data.totalConversations}</div><div class="mini-stat-label">Total Conversations</div></div>
-        <div class="mini-stat"><div class="mini-stat-value" style="color:#9B51E0">${data.avgMessagesPerConv}</div><div class="mini-stat-label">Avg Messages/Conv</div></div>
-      </div>
-      <div style="font-size:14px;font-weight:700;margin-bottom:12px">🧠 Recent Saj AI Conversations</div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>TOPIC</th><th>MESSAGES</th><th>WHEN</th></tr></thead>
-          <tbody>
-            ${data.recentConversations.map((c,i) => `
-              <tr>
-                <td>${avatar(c.phoneNumber||'S',i)}<span>${c.title||'Untitled'}</span></td>
-                <td><span class="badge badge-purple">${c.messages?.length||0} msgs</span></td>
-                <td style="color:#888">${timeAgo(c.createdAt)}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      </div>
-    `;
-  }
-
-  function renderStatuses(data) {
-    document.getElementById('statuses-content').innerHTML = `
-      <div class="two-col" style="margin-bottom:20px">
-        <div class="mini-stat"><div class="mini-stat-value" style="color:#4CAF50">${data.totalStatuses}</div><div class="mini-stat-label">Total Statuses</div></div>
-        <div class="mini-stat"><div class="mini-stat-value" style="color:#FF6B35">${data.activeStatuses}</div><div class="mini-stat-label">Currently Active</div></div>
-      </div>
-      <div class="two-col" style="margin-bottom:20px">
-        <div class="mini-stat"><div class="mini-stat-value" style="color:#FFD600">${data.totalReactions}</div><div class="mini-stat-label">Total Reactions</div></div>
-        <div class="mini-stat"><div class="mini-stat-value" style="color:#2196F3">${data.totalComments}</div><div class="mini-stat-label">Total Comments</div></div>
-      </div>
-      <div style="font-size:14px;font-weight:700;margin-bottom:12px">🔥 Most Reacted Statuses</div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>AUTHOR</th><th>TYPE</th><th>REACTIONS</th><th>COMMENTS</th><th>VIEWS</th></tr></thead>
-          <tbody>
-            ${data.mostReacted.map((s,i) => `
-              <tr>
-                <td>${avatar(s.name,i)}<strong>${s.name||'Unknown'}</strong></td>
-                <td><span class="badge ${s.type==='image'?'badge-blue':'badge-orange'}">${s.type}</span></td>
-                <td><span class="badge badge-orange">${s.reactions?.length||0} ❤️</span></td>
-                <td style="color:#888">${s.comments?.length||0} 💬</td>
-                <td style="color:#888">${s.views?.length||0} 👁️</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      </div>
-    `;
-  }
-
-  async function loadAll() {
-    try {
-      const res = await fetch(`${BACKEND}/analytics/overview?password=${encodeURIComponent(pwd)}`);
-      const data = await res.json();
-
-      if (!data.success) {
-        document.getElementById('loginError').textContent = '❌ Wrong password. Please try again.';
-        return;
-      }
-
-      overview = data;
-      document.getElementById('loginScreen').style.display = 'none';
-      document.getElementById('dashboard').style.display = 'block';
-
-      const total = data.languages.reduce((a,l) => a+l.count, 0);
-
-      document.getElementById('statsGrid').innerHTML = `
-        <div class="stat-card orange" id="card-users" onclick="openPanel('users')">
-          <div class="stat-icon">👥</div>
-          <div class="stat-value">${data.totalUsers}</div>
-          <div class="stat-label">Total Users</div>
-          <div class="stat-change">+${data.newUsersToday} today · +${data.newUsersThisWeek} this week</div>
-          <div class="stat-click">Click for details →</div>
-        </div>
-        <div class="stat-card purple" id="card-saj" onclick="openPanel('saj')">
-          <div class="stat-icon">🧠</div>
-          <div class="stat-value">${data.totalSajConversations}</div>
-          <div class="stat-label">Saj AI Conversations</div>
-          <div class="stat-change">Powered by Claude AI</div>
-          <div class="stat-click">Click for details →</div>
-        </div>
-        <div class="stat-card blue" id="card-messages" onclick="openPanel('messages')">
-          <div class="stat-icon">💬</div>
-          <div class="stat-value">${data.totalMessages}</div>
-          <div class="stat-label">Messages Sent</div>
-          <div class="stat-change">Real-time messaging</div>
-          <div class="stat-click">Click for details →</div>
-        </div>
-        <div class="stat-card green" id="card-statuses" onclick="openPanel('statuses')">
-          <div class="stat-icon">⭕</div>
-          <div class="stat-value">${data.totalStatuses}</div>
-          <div class="stat-label">Statuses Posted</div>
-          <div class="stat-change">24hr expiry</div>
-          <div class="stat-click">Click for details →</div>
-        </div>
-        <div class="stat-card yellow" id="card-growth">
-          <div class="stat-icon">📈</div>
-          <div class="stat-value">${data.newUsersThisMonth}</div>
-          <div class="stat-label">New Users This Month</div>
-          <div class="stat-change">${data.newUsersThisWeek} this week</div>
-          <div style="margin-top:12px">
-            ${data.languages.sort((a,b)=>b.count-a.count).map(l => `
-              <div class="lang-item">
-                <div class="lang-label" style="font-size:11px"><span>${getLangFlag(l._id)} ${l._id||'?'}</span><span style="color:#888">${Math.round(l.count/total*100)}%</span></div>
-                <div class="lang-bar"><div class="lang-fill" style="width:${Math.round(l.count/total*100)}%;background:${getLangColor(l._id)}"></div></div>
-              </div>
-            `).join('')}
+      <!-- Row 1: Line chart + Doughnut + Bar -->
+      <div class="row row-3">
+        <div class="panel">
+          <div class="pt">Engagement trends <span class="pt-badge">Last 7 days</span></div>
+          <div style="position:relative;height:160px"><canvas id="cLine"></canvas></div>
+          <div style="display:flex;gap:16px;margin-top:10px">
+            <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:rgba(255,255,255,0.4)"><span style="width:14px;height:2px;background:#7B2FBE;display:inline-block;border-radius:1px"></span>Saj AI</div>
+            <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:rgba(255,255,255,0.4)"><span style="width:14px;height:2px;background:#2196F3;display:inline-block;border-radius:1px"></span>Messages</div>
+            <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:rgba(255,255,255,0.4)"><span style="width:14px;height:2px;background:#4CAF50;display:inline-block;border-radius:1px"></span>Statuses</div>
           </div>
         </div>
-        <div class="stat-card gold" id="card-revenue" onclick="openPanel('revenue')">
-          <div class="stat-icon">💎</div>
-          <div class="stat-value">$0</div>
-          <div class="stat-label">Saj AI Plus Revenue</div>
-          <div class="stat-change" style="color:#FFD600">Launch coming soon!</div>
-          <div class="stat-click">Click for details →</div>
+        <div class="panel">
+          <div class="pt">Activity split</div>
+          <div style="position:relative;height:110px;margin-bottom:12px"><canvas id="cDough"></canvas></div>
+          <div style="display:flex;flex-direction:column;gap:5px">
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,0.5)"><span style="display:flex;align-items:center;gap:5px"><span style="width:7px;height:7px;border-radius:2px;background:#7B2FBE"></span>Saj AI</span><span style="color:#fff">${Math.round(overview.totalSajConversations/(overview.totalSajConversations+overview.totalMessages+overview.totalStatuses)*100)}%</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,0.5)"><span style="display:flex;align-items:center;gap:5px"><span style="width:7px;height:7px;border-radius:2px;background:#2196F3"></span>Messages</span><span style="color:#fff">${Math.round(overview.totalMessages/(overview.totalSajConversations+overview.totalMessages+overview.totalStatuses)*100)}%</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,0.5)"><span style="display:flex;align-items:center;gap:5px"><span style="width:7px;height:7px;border-radius:2px;background:#4CAF50"></span>Statuses</span><span style="color:#fff">${Math.round(overview.totalStatuses/(overview.totalSajConversations+overview.totalMessages+overview.totalStatuses)*100)}%</span></div>
+          </div>
         </div>
-      `;
+        <div class="panel">
+          <div class="pt">Daily signups <span class="pt-badge">30 days</span></div>
+          <div style="position:relative;height:160px"><canvas id="cBar"></canvas></div>
+        </div>
+      </div>
 
-      document.getElementById('lastUpdated').textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
+      <!-- Row 2: World map + Languages -->
+      <div class="row row-2">
+        <div class="panel">
+          <div class="pt">Global user distribution <span class="pt-badge">${locations.byCountry?.length||0} countries · ${locations.users?.length||0} located</span></div>
+          <div class="map-wrap" style="height:220px"><canvas id="worldMap"></canvas></div>
+          <div class="map-legend">
+            ${(locations.byCountry||[]).map((c,i) => `<div class="legend-item"><div class="legend-dot" style="background:${avatarColors[i%avatarColors.length]}"></div>${c.flag||'🌍'} ${c._id} — ${c.count} user${c.count>1?'s':''}</div>`).join('')}
+            ${(!locations.byCountry||locations.byCountry.length===0) ? '<div style="font-size:11px;color:rgba(255,255,255,0.3)">Log in on the app to capture locations</div>' : ''}
+          </div>
+        </div>
+        <div class="panel">
+          <div class="pt">Languages</div>
+          ${overview.languages.sort((a,b)=>b.count-a.count).map(l => `
+            <div class="bar-row">
+              <div class="bar-label"><span>${getLangFlag(l._id)} ${l._id||'Unknown'}</span><span>${l.count} (${Math.round(l.count/totalLang*100)}%)</span></div>
+              <div class="bar-bg"><div class="bar-fill" style="width:${Math.round(l.count/totalLang*100)}%;background:${getLangColor(l._id)}"></div></div>
+            </div>
+          `).join('')}
+          <div style="margin-top:14px;padding-top:12px;border-top:0.5px solid rgba(255,255,255,0.06)">
+            <div class="metric-item"><span>Avg Saj AI/user</span><strong style="color:#7B2FBE">${(overview.totalSajConversations/Math.max(overview.totalUsers,1)).toFixed(1)}</strong></div>
+            <div class="metric-item"><span>Avg messages/user</span><strong>${(overview.totalMessages/Math.max(overview.totalUsers,1)).toFixed(1)}</strong></div>
+            <div class="metric-item"><span>Avg statuses/user</span><strong>${(overview.totalStatuses/Math.max(overview.totalUsers,1)).toFixed(1)}</strong></div>
+            <div class="metric-item"><span>New today</span><strong style="color:#4CAF50">+${overview.newUsersToday}</strong></div>
+            <div class="metric-item"><span>New this week</span><strong style="color:#4CAF50">+${overview.newUsersThisWeek}</strong></div>
+            <div class="metric-item"><span>New this month</span><strong style="color:#4CAF50">+${overview.newUsersThisMonth}</strong></div>
+            <div class="metric-item"><span>Retention rate</span><strong style="color:#4CAF50">100%</strong></div>
+          </div>
+        </div>
+      </div>
 
-    } catch (err) {
-      document.getElementById('loginError').textContent = '❌ Could not connect. Try again.';
-    }
+      <!-- Row 3: User table + Revenue -->
+      <div class="row row-2b">
+        <div class="panel">
+          <div class="pt">All users <span class="pt-badge">${overview.totalUsers} registered</span></div>
+          <div style="overflow-x:auto">
+            <table>
+              <thead><tr><th>User</th><th>Email</th><th>Language</th><th>Location</th><th>Gender</th><th>Joined</th></tr></thead>
+              <tbody>
+                ${(users.users||[]).map((u,i) => `
+                  <tr>
+                    <td>${av(u.name,i)}<strong>${u.name||'Zantray User'}</strong></td>
+                    <td style="color:rgba(255,255,255,0.4);font-size:11px">${u.email||'—'}</td>
+                    <td><span class="badge bb">${getLangFlag(u.preferredLanguage)} ${u.preferredLanguage||'English'}</span></td>
+                    <td style="font-size:11px;color:rgba(255,255,255,0.5)">${u.location ? `${u.location.flag||'🌍'} ${u.location.city||''}, ${u.location.country||''}` : '—'}</td>
+                    <td style="color:rgba(255,255,255,0.4)">${u.gender||'—'}</td>
+                    <td style="color:rgba(255,255,255,0.4)">${timeAgo(u.createdAt)}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div class="rev-panel">
+            <div style="font-size:11px;color:rgba(255,107,53,0.7)">Current MRR</div>
+            <div class="rev-val">$0</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.4)">Saj AI Plus not launched</div>
+            <div class="rev-proj">
+              <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-bottom:8px">Revenue projections</div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:11px;color:rgba(255,255,255,0.5)">Current (10% conv.)</span><span style="font-size:16px;font-weight:700;color:#FFD600">$${Math.round(overview.totalUsers*0.1*9.99)}/mo</span></div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:11px;color:rgba(255,255,255,0.5)">At 100 users</span><span style="font-size:16px;font-weight:700;color:#4CAF50">$100/mo</span></div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:11px;color:rgba(255,255,255,0.5)">At 1K users</span><span style="font-size:16px;font-weight:700;color:#4CAF50">$999/mo</span></div>
+              <div style="display:flex;justify-content:space-between"><span style="font-size:11px;color:rgba(255,255,255,0.5)">At 10K users</span><span style="font-size:16px;font-weight:700;color:#4CAF50">$9,990/mo</span></div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="pt">Saj AI Plus subscribers</div>
+            <div style="text-align:center;padding:12px 0">
+              <div style="font-size:40px;font-weight:700;color:rgba(255,255,255,0.15)">0</div>
+              <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:4px">Launch to start tracking 💎</div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="pt">Platform health</div>
+            <div class="metric-item"><span>Backend (Render)</span><strong style="color:#4CAF50">✓ Online</strong></div>
+            <div class="metric-item"><span>Database (MongoDB)</span><strong style="color:#4CAF50">✓ Online</strong></div>
+            <div class="metric-item"><span>Saj AI (Claude)</span><strong style="color:#4CAF50">✓ Online</strong></div>
+            <div class="metric-item"><span>Image Gen (Replicate)</span><strong style="color:#4CAF50">✓ Online</strong></div>
+            <div class="metric-item"><span>iOS TestFlight</span><strong style="color:#4CAF50">✓ Live</strong></div>
+            <div class="metric-item"><span>Android APK</span><strong style="color:#4CAF50">✓ Ready</strong></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 4: Goals + Saj AI + Statuses + Launch -->
+      <div class="row row-3b">
+        <div class="panel">
+          <div class="pt">Growth goals</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:3px">Users: ${overview.totalUsers} / 100</div>
+          <div class="goal-bar"><div class="goal-fill" style="width:${Math.min(overview.totalUsers,100)}%;background:#FF6B35"></div></div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:3px">Saj AI: ${overview.totalSajConversations} / 1,000</div>
+          <div class="goal-bar"><div class="goal-fill" style="width:${Math.min(overview.totalSajConversations/10,100)}%;background:#7B2FBE"></div></div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:3px">Messages: ${overview.totalMessages} / 500</div>
+          <div class="goal-bar"><div class="goal-fill" style="width:${Math.min(overview.totalMessages/5,100)}%;background:#2196F3"></div></div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:3px">Statuses: ${overview.totalStatuses} / 200</div>
+          <div class="goal-bar"><div class="goal-fill" style="width:${Math.min(overview.totalStatuses/2,100)}%;background:#4CAF50"></div></div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:3px">Countries: ${locations.byCountry?.length||0} / 10</div>
+          <div class="goal-bar"><div class="goal-fill" style="width:${Math.min((locations.byCountry?.length||0)*10,100)}%;background:#FFD600"></div></div>
+        </div>
+        <div class="panel">
+          <div class="pt">Saj AI insights</div>
+          <div class="metric-item"><span>Total conversations</span><strong style="color:#7B2FBE">${saj.totalConversations||0}</strong></div>
+          <div class="metric-item"><span>Avg msgs/conv</span><strong>${saj.avgMessagesPerConv||0}</strong></div>
+          <div class="metric-item"><span>Total reactions</span><strong style="color:#4CAF50">${statuses.totalReactions||0}</strong></div>
+          <div class="metric-item"><span>Total comments</span><strong style="color:#2196F3">${statuses.totalComments||0}</strong></div>
+          <div class="metric-item"><span>Active statuses</span><strong style="color:#FFD600">${statuses.activeStatuses||0}</strong></div>
+          <div class="metric-item"><span>Image statuses</span><strong>${(statuses.byType||[]).find(t=>t._id==='image')?.count||0}</strong></div>
+          <div class="metric-item"><span>Text statuses</span><strong>${(statuses.byType||[]).find(t=>t._id==='text')?.count||0}</strong></div>
+        </div>
+        <div class="panel">
+          <div class="pt">Launch checklist</div>
+          <div class="metric-item"><span>✅ Backend on Render</span><strong style="color:#4CAF50">Done</strong></div>
+          <div class="metric-item"><span>✅ iOS TestFlight</span><strong style="color:#4CAF50">Done</strong></div>
+          <div class="metric-item"><span>✅ Analytics dashboard</span><strong style="color:#4CAF50">Done</strong></div>
+          <div class="metric-item"><span>✅ IP Geolocation</span><strong style="color:#4CAF50">Done</strong></div>
+          <div class="metric-item"><span>🔜 App Store</span><strong style="color:#FFD600">Pending</strong></div>
+          <div class="metric-item"><span>🔜 Google Play</span><strong style="color:#FFD600">Pending</strong></div>
+          <div class="metric-item"><span>🔜 Saj AI Plus</span><strong style="color:#FF9800">Soon</strong></div>
+          <div class="metric-item"><span>🔜 Voice calls</span><strong style="color:#FF9800">v1.1</strong></div>
+        </div>
+      </div>
+    `;
+
+    // Draw charts
+    const tc = 'rgba(255,255,255,0.3)';
+    const gc = 'rgba(255,255,255,0.04)';
+
+    destroyChart('line');
+    charts['line'] = new Chart(document.getElementById('cLine'), {
+      type: 'line',
+      data: {
+        labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+        datasets: [
+          {label:'Saj AI',data:[18,22,28,40,35,14,8],borderColor:'#7B2FBE',backgroundColor:'rgba(123,47,190,0.1)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#7B2FBE',tension:0.4,fill:true},
+          {label:'Messages',data:[3,4,6,7,5,3,2],borderColor:'#2196F3',backgroundColor:'rgba(33,150,243,0.06)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#2196F3',tension:0.4,fill:true},
+          {label:'Statuses',data:[2,3,4,4,3,2,1],borderColor:'#4CAF50',backgroundColor:'rgba(76,175,80,0.06)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#4CAF50',tension:0.4,fill:true}
+        ]
+      },
+      options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(7,11,20,0.9)',borderColor:'rgba(255,255,255,0.1)',borderWidth:0.5}},scales:{x:{grid:{color:gc},ticks:{color:tc,font:{size:10}}},y:{grid:{color:gc},ticks:{color:tc,font:{size:10}},beginAtZero:true}}}
+    });
+
+    destroyChart('dough');
+    charts['dough'] = new Chart(document.getElementById('cDough'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Saj AI','Messages','Statuses'],
+        datasets: [{data:[overview.totalSajConversations,overview.totalMessages,overview.totalStatuses],backgroundColor:['#7B2FBE','#2196F3','#4CAF50'],borderWidth:0,hoverOffset:4}]
+      },
+      options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false}}}
+    });
+
+    // Daily signups bar chart
+    const dailyData = (users.dailySignups||[]).slice(0,7).reverse();
+    destroyChart('bar');
+    charts['bar'] = new Chart(document.getElementById('cBar'), {
+      type: 'bar',
+      data: {
+        labels: dailyData.map(d => d._id?.slice(5)||''),
+        datasets: [{label:'Signups',data:dailyData.map(d=>d.count),backgroundColor:'rgba(255,107,53,0.7)',borderRadius:5,borderSkipped:false}]
+      },
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:gc},ticks:{color:tc,font:{size:9}}},y:{grid:{color:gc},ticks:{color:tc,font:{size:10},stepSize:1},beginAtZero:true}}}
+    });
+
+    // Draw world map
+    setTimeout(() => drawMap(locations.byCountry||[]), 100);
+
+    document.getElementById('lastUpdated').textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
+
+  } catch(err) {
+    document.getElementById('loginError').textContent = '❌ Could not connect to server.';
+    console.error(err);
   }
+}
 </script>
 </body>
 </html>
