@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Zantray Business Admin</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#070B14;color:#fff;min-height:100vh}
+    .login{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+    .login-card{background:#1A1A2E;border-radius:20px;padding:40px;width:100%;max-width:400px;border:1px solid rgba(255,255,255,0.08);text-align:center}
+    .logo{font-size:28px;font-weight:900;margin-bottom:4px}
+    .logo span{color:#FF6B35}
+    .sub{font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:28px}
+    input{width:100%;background:#070B14;border:1.5px solid rgba(255,255,255,0.08);border-radius:12px;padding:13px 16px;color:#fff;font-size:15px;margin-bottom:14px;outline:none;text-align:center;letter-spacing:3px}
+    input:focus{border-color:#FF6B35}
+    .btn{width:100%;background:#FF6B35;color:#fff;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer}
+    .btn:hover{background:#e55a25}
+    .error{color:#FF4444;font-size:13px;margin-top:10px}
+    .app{display:none;padding:24px;max-width:900px;margin:0 auto}
+    .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-bottom:16px;border-bottom:0.5px solid rgba(255,255,255,0.07)}
+    .header-title{font-size:20px;font-weight:700}
+    .header-title span{color:#FF6B35}
+    .back-btn{background:rgba(255,255,255,0.06);border:0.5px solid rgba(255,255,255,0.1);color:#fff;padding:8px 16px;border-radius:10px;cursor:pointer;font-size:13px;text-decoration:none}
+    .logout-btn{background:transparent;border:0.5px solid #FF4444;color:#FF4444;padding:8px 16px;border-radius:10px;cursor:pointer;font-size:13px}
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}
+    .stat{background:rgba(255,255,255,0.04);border:0.5px solid rgba(255,255,255,0.08);border-radius:12px;padding:16px;text-align:center}
+    .stat-val{font-size:28px;font-weight:700}
+    .stat-label{font-size:11px;color:rgba(255,255,255,0.4);margin-top:4px}
+    .section-title{font-size:13px;font-weight:700;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px}
+    .card{background:rgba(255,255,255,0.04);border:0.5px solid rgba(255,255,255,0.08);border-radius:14px;padding:16px;margin-bottom:12px}
+    .card-top{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px}
+    .card-photo{width:72px;height:72px;border-radius:10px;object-fit:cover;flex-shrink:0;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:28px}
+    .card-name{font-size:16px;font-weight:700;color:#fff;margin-bottom:4px}
+    .card-cat{display:inline-block;font-size:10px;background:rgba(255,214,0,0.15);color:#FFD600;padding:2px 8px;border-radius:6px;margin-left:6px}
+    .card-meta{font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:3px}
+    .card-desc{font-size:12px;color:rgba(255,255,255,0.4);margin-top:6px}
+    .card-submitter{font-size:11px;color:rgba(255,255,255,0.3);margin-top:6px}
+    .photos-row{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+    .photos-row img{width:52px;height:52px;border-radius:8px;object-fit:cover}
+    .actions{display:flex;gap:8px}
+    .approve-btn{background:rgba(76,175,80,0.15);border:0.5px solid #4CAF50;color:#4CAF50;padding:8px 20px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer}
+    .approve-btn:hover{background:rgba(76,175,80,0.25)}
+    .reject-btn{background:rgba(255,68,68,0.1);border:0.5px solid #FF4444;color:#FF4444;padding:8px 20px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer}
+    .reject-btn:hover{background:rgba(255,68,68,0.2)}
+    .empty{text-align:center;padding:40px;color:rgba(255,255,255,0.3)}
+    .empty-icon{font-size:40px;margin-bottom:12px}
+    .tabs{display:flex;gap:8px;margin-bottom:20px}
+    .tab{padding:8px 16px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;border:0.5px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.5);background:transparent}
+    .tab.active{background:#FF6B35;border-color:#FF6B35;color:#fff}
+    .approved-badge{font-size:10px;background:rgba(76,175,80,0.15);color:#4CAF50;padding:2px 8px;border-radius:6px;margin-left:6px}
+    .rejected-badge{font-size:10px;background:rgba(255,68,68,0.1);color:#FF4444;padding:2px 8px;border-radius:6px;margin-left:6px}
+    .loading{text-align:center;padding:40px;color:rgba(255,255,255,0.3)}
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login" id="loginScreen">
+  <div class="login-card">
+    <div class="logo">Zan<span>tray</span></div>
+    <div class="sub">Business Admin Panel · Private Access</div>
+    <input type="password" id="pwdInput" placeholder="Enter password" onkeypress="if(event.key==='Enter')login()"/>
+    <button class="btn" onclick="login()">Access Panel</button>
+    <div class="error" id="loginError"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app" id="appScreen">
+  <div class="header">
+    <div class="header-title">🏪 Zan<span>tray</span> Business Admin</div>
+    <div style="display:flex;gap:8px">
+      <a href="index.html" class="back-btn">← CEO Dashboard</a>
+      <button class="logout-btn" onclick="logout()">Log Out</button>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-val" id="statPending" style="color:#FFD600">—</div>
+      <div class="stat-label">Pending</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val" id="statApproved" style="color:#4CAF50">—</div>
+      <div class="stat-label">Approved</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val" id="statTotal" style="color:#FF6B35">—</div>
+      <div class="stat-label">Total Listings</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" id="tab-pending" onclick="switchTab('pending')">⏳ Pending</div>
+    <div class="tab" id="tab-approved" onclick="switchTab('approved')">✅ Approved</div>
+  </div>
+
+  <div id="listingsContainer">
+    <div class="loading">Loading listings...</div>
+  </div>
+</div>
+
+<script>
+const BACKEND = 'https://zantray-backend.onrender.com';
+let pwd = '';
+let currentTab = 'pending';
+let allListings = [];
+
+async function login() {
+  pwd = document.getElementById('pwdInput').value;
+  if (!pwd) return;
+  try {
+    const res = await fetch(`${BACKEND}/business/admin/pending?password=${encodeURIComponent(pwd)}`);
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('appScreen').style.display = 'block';
+      await loadAll();
+    } else {
+      document.getElementById('loginError').textContent = '❌ Wrong password.';
+    }
+  } catch(err) {
+    document.getElementById('loginError').textContent = '❌ Could not connect.';
+  }
+}
+
+function logout() {
+  pwd = '';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('appScreen').style.display = 'none';
+  document.getElementById('pwdInput').value = '';
+}
+
+async function loadAll() {
+  try {
+    const [pendingRes, approvedRes] = await Promise.all([
+      fetch(`${BACKEND}/business/admin/pending?password=${encodeURIComponent(pwd)}`),
+      fetch(`${BACKEND}/business/browse`)
+    ]);
+    const pendingData = await pendingRes.json();
+    const approvedData = await approvedRes.json();
+    const pending = pendingData.pending || [];
+    const approved = approvedData.businesses || [];
+    allListings = { pending, approved };
+    document.getElementById('statPending').textContent = pending.length;
+    document.getElementById('statApproved').textContent = approved.length;
+    document.getElementById('statTotal').textContent = pending.length + approved.length;
+    renderListings();
+  } catch(err) {
+    document.getElementById('listingsContainer').innerHTML = '<div class="empty"><div class="empty-icon">⚠️</div>Could not load listings</div>';
+  }
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(`tab-${tab}`).classList.add('active');
+  renderListings();
+}
+
+function renderListings() {
+  const container = document.getElementById('listingsContainer');
+  const items = allListings[currentTab] || [];
+  if (items.length === 0) {
+    container.innerHTML = `<div class="empty"><div class="empty-icon">${currentTab === 'pending' ? '✅' : '🏪'}</div>${currentTab === 'pending' ? 'No pending listings right now!' : 'No approved listings yet.'}</div>`;
+    return;
+  }
+  container.innerHTML = items.map(b => `
+    <div class="card">
+      <div class="card-top">
+        ${b.photos?.[0] ? `<img src="${b.photos[0]}" class="card-photo" />` : '<div class="card-photo">🏪</div>'}
+        <div style="flex:1;min-width:0">
+          <div class="card-name">${b.name}<span class="card-cat">${b.category}</span>${b.status === 'approved' ? '<span class="approved-badge">✅ Live</span>' : ''}</div>
+          <div class="card-meta">📍 ${b.address}${b.city ? ', ' + b.city : ''}${b.country ? ', ' + b.country : ''}</div>
+          ${b.phone ? `<div class="card-meta">📞 ${b.phone}</div>` : ''}
+          ${b.hours ? `<div class="card-meta">🕐 ${b.hours}</div>` : ''}
+          ${b.description ? `<div class="card-desc">${b.description}</div>` : ''}
+          <div class="card-submitter">Submitted by ${b.ownerEmail} · ${new Date(b.createdAt).toLocaleDateString()}</div>
+        </div>
+      </div>
+      ${b.photos?.length > 1 ? `<div class="photos-row">${b.photos.slice(1).map(p => `<img src="${p}" />`).join('')}</div>` : ''}
+      ${currentTab === 'pending' ? `
+      <div class="actions">
+        <button class="approve-btn" onclick="review('${b._id}','approved')">✅ Approve</button>
+        <button class="reject-btn" onclick="review('${b._id}','rejected')">❌ Reject</button>
+      </div>` : ''}
+    </div>
+  `).join('');
+}
+
+async function review(id, status) {
+  try {
+    const res = await fetch(`${BACKEND}/business/admin/review/${id}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pwd, status })
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert(status === 'approved' ? '✅ Listing approved and now live!' : '❌ Listing rejected.');
+      await loadAll();
+    } else {
+      alert('Error: ' + (data.error || 'Could not update'));
+    }
+  } catch(err) { alert('Could not connect'); }
+}
+</script>
+</body>
+</html>
