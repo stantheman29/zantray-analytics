@@ -503,9 +503,11 @@ async function loadAll() {
     setTimeout(() => drawMap(locations.byCountry||[]), 100);
 
     document.getElementById('lastUpdated').textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
-
-  // Load pending business listings
-  await loadPendingListings();
+    await loadPendingListings();
+  } catch(err) {
+    document.getElementById('loginError').textContent = '❌ Wrong password.';
+    console.error(err);
+  }
 }
 
 async function loadPendingListings() {
