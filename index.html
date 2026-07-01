@@ -447,16 +447,6 @@ async function loadAll() {
           <div class="metric-item"><span>🔜 Voice calls</span><strong style="color:#FF9800">v1.1</strong></div>
         </div>
       </div>
-
-      <!-- Pending Business Listings -->
-      <div class="row-2b" style="margin-top:16px">
-        <div class="panel" style="grid-column:1/-1">
-          <div class="pt">🏪 Pending Business Listings <span class="pt-badge" id="pendingCount">Loading...</span></div>
-          <div id="pendingListings">
-            <div style="text-align:center;padding:20px;color:rgba(255,255,255,0.3)">Loading pending listings...</div>
-          </div>
-        </div>
-      </div>
     `;
 
     // Draw charts
@@ -503,66 +493,6 @@ async function loadAll() {
     setTimeout(() => drawMap(locations.byCountry||[]), 100);
 
     document.getElementById('lastUpdated').textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
-
-  // Load pending business listings
-  await loadPendingListings();
-}
-
-async function loadPendingListings() {
-  try {
-    const res = await fetch(`${BACKEND}/business/admin/pending?password=${encodeURIComponent(pwd)}`);
-    const data = await res.json();
-    const container = document.getElementById('pendingListings');
-    const countBadge = document.getElementById('pendingCount');
-    if (!data.success) { container.innerHTML = '<div style="text-align:center;padding:20px;color:rgba(255,255,255,0.3)">Could not load listings</div>'; return; }
-    const pending = data.pending || [];
-    countBadge.textContent = `${pending.length} pending`;
-    if (pending.length === 0) {
-      container.innerHTML = '<div style="text-align:center;padding:20px;color:rgba(255,255,255,0.3)">✅ No pending listings right now</div>';
-      return;
-    }
-    container.innerHTML = pending.map(b => `
-      <div style="background:rgba(255,255,255,0.03);border:0.5px solid rgba(255,255,255,0.08);border-radius:12px;padding:16px;margin-bottom:12px">
-        <div style="display:flex;gap:12px;align-items:flex-start">
-          ${b.photos?.[0] ? `<img src="${b.photos[0]}" style="width:64px;height:64px;border-radius:8px;object-fit:cover;flex-shrink:0" />` : '<div style="width:64px;height:64px;border-radius:8px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">🏪</div>'}
-          <div style="flex:1;min-width:0">
-            <div style="font-size:15px;font-weight:700;color:#fff;margin-bottom:4px">${b.name} <span style="font-size:10px;background:rgba(255,214,0,0.15);color:#FFD600;padding:2px 8px;border-radius:6px">${b.category}</span></div>
-            <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:2px">📍 ${b.address}, ${b.city}, ${b.country}</div>
-            <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:2px">📞 ${b.phone || '—'} · 🕐 ${b.hours || '—'}</div>
-            <div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:8px">${b.description || '—'}</div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-bottom:8px">Submitted by ${b.ownerEmail} · ${new Date(b.createdAt).toLocaleDateString()}</div>
-            ${b.photos?.length > 1 ? `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">${b.photos.slice(1).map(p => `<img src="${p}" style="width:48px;height:48px;border-radius:6px;object-fit:cover" />`).join('')}</div>` : ''}
-            <div style="display:flex;gap:8px">
-              <button onclick="reviewListing('${b._id}','approved')" style="background:rgba(76,175,80,0.15);border:0.5px solid #4CAF50;color:#4CAF50;padding:7px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">✅ Approve</button>
-              <button onclick="reviewListing('${b._id}','rejected')" style="background:rgba(255,68,68,0.1);border:0.5px solid #FF4444;color:#FF4444;padding:7px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">❌ Reject</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    `).join('');
-  } catch(err) {
-    document.getElementById('pendingListings').innerHTML = '<div style="text-align:center;padding:20px;color:rgba(255,255,255,0.3)">Could not load listings</div>';
-  }
-}
-
-async function reviewListing(id, status) {
-  try {
-    const res = await fetch(`${BACKEND}/business/admin/review/${id}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password: pwd, status })
-    });
-    const data = await res.json();
-    if (data.success) {
-      alert(status === 'approved' ? '✅ Listing approved and now live!' : '❌ Listing rejected.');
-      await loadPendingListings();
-    } else {
-      alert('Error: ' + (data.error || 'Could not update listing'));
-    }
-  } catch(err) { alert('Could not connect to server'); }
-}
-
-
 
   } catch(err) {
     document.getElementById('loginError').textContent = '❌ Could not connect to server.';
