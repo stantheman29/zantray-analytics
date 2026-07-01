@@ -213,11 +213,13 @@ function renderListings() {
         </div>
       </div>
       ${b.photos?.length > 1 ? `<div class="photos-row">${b.photos.slice(1).map(p => `<img src="${p}" />`).join('')}</div>` : ''}
-      ${currentTab === 'pending' ? `
       <div class="actions">
-        <button class="approve-btn" onclick="review('${b._id}','approved')">✅ Approve</button>
-        <button class="reject-btn" onclick="review('${b._id}','rejected')">❌ Reject</button>
-      </div>` : ''}
+        ${currentTab === 'pending' ? `
+          <button class="approve-btn" onclick="review('${b._id}','approved')">✅ Approve</button>
+          <button class="reject-btn" onclick="review('${b._id}','rejected')">❌ Reject</button>
+        ` : ''}
+        <button onclick="deleteListing('${b._id}','${b.name}')" style="background:rgba(255,68,68,0.1);border:0.5px solid #FF4444;color:#FF4444;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer">🗑️ Delete</button>
+      </div>
     </div>
   `).join('');
 }
@@ -263,6 +265,24 @@ function openLightbox(src) {
 
 function closeLightbox() {
   document.getElementById('lightbox').style.display = 'none';
+}
+
+async function deleteListing(id, name) {
+  if (!confirm(`Delete "${name}" permanently? This cannot be undone.`)) return;
+  try {
+    const res = await fetch(`${BACKEND}/business/admin/${id}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pwd })
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert('🗑️ Listing deleted successfully.');
+      await loadAll();
+    } else {
+      alert('Error: ' + (data.error || 'Could not delete'));
+    }
+  } catch(err) { alert('Could not connect'); }
 }
 
 async function review(id, status) {
