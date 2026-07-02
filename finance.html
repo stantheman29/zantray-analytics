@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Zantray Finance</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#070B14;color:#fff;min-height:100vh}
+    .login{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+    .login-card{background:#1A1A2E;border-radius:20px;padding:40px;width:100%;max-width:400px;border:1px solid rgba(255,255,255,0.08);text-align:center}
+    .logo{font-size:28px;font-weight:900;margin-bottom:4px}
+    .logo span{color:#FF6B35}
+    .sub{font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:28px}
+    input,select{width:100%;background:#070B14;border:1.5px solid rgba(255,255,255,0.08);border-radius:12px;padding:13px 16px;color:#fff;font-size:15px;margin-bottom:14px;outline:none}
+    input:focus,select:focus{border-color:#FF6B35}
+    .btn{background:#FF6B35;color:#fff;border:none;border-radius:12px;padding:14px 24px;font-size:15px;font-weight:700;cursor:pointer}
+    .btn:hover{background:#e55a25}
+    .btn-outline{background:transparent;border:0.5px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);border-radius:12px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer}
+    .btn-outline:hover{background:rgba(255,255,255,0.06)}
+    .error{color:#FF4444;font-size:13px;margin-top:10px}
+    .app{display:none;padding:24px;max-width:1100px;margin:0 auto}
+    .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-bottom:16px;border-bottom:0.5px solid rgba(255,255,255,0.07);flex-wrap:wrap;gap:12px}
+    .header-title{font-size:22px;font-weight:900}
+    .header-title span{color:#FF6B35}
+    .header-actions{display:flex;gap:8px;align-items:center}
+    .kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+    .kpi-card{background:rgba(255,255,255,0.04);border:0.5px solid rgba(255,255,255,0.08);border-radius:14px;padding:20px}
+    .kpi-label{font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+    .kpi-val{font-size:26px;font-weight:700}
+    .kpi-sub{font-size:11px;color:rgba(255,255,255,0.3);margin-top:4px}
+    .main{display:grid;grid-template-columns:1fr 1.6fr;gap:20px}
+    .panel{background:rgba(255,255,255,0.04);border:0.5px solid rgba(255,255,255,0.08);border-radius:14px;padding:20px}
+    .panel-title{font-size:14px;font-weight:700;color:rgba(255,255,255,0.7);margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
+    .form-label{font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px}
+    .type-toggle{display:flex;background:#070B14;border-radius:10px;padding:4px;margin-bottom:16px}
+    .type-btn{flex:1;padding:8px;border-radius:8px;border:none;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s}
+    .type-btn.expense.active{background:#FF4444;color:#fff}
+    .type-btn.income.active{background:#4CAF50;color:#fff}
+    .type-btn:not(.active){background:transparent;color:rgba(255,255,255,0.4)}
+    .entry-row{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:0.5px solid rgba(255,255,255,0.05)}
+    .entry-row:last-child{border:none}
+    .entry-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    .entry-info{flex:1;min-width:0}
+    .entry-name{font-size:13px;font-weight:600;color:#fff}
+    .entry-meta{font-size:11px;color:rgba(255,255,255,0.4);margin-top:1px}
+    .entry-amount{font-size:14px;font-weight:700;flex-shrink:0}
+    .entry-delete{background:none;border:none;color:rgba(255,255,255,0.2);cursor:pointer;font-size:14px;padding:4px;flex-shrink:0}
+    .entry-delete:hover{color:#FF4444}
+    .tabs{display:flex;gap:6px;margin-bottom:16px}
+    .tab{padding:6px 14px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;border:0.5px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.4);background:transparent}
+    .tab.active{background:rgba(255,107,53,0.15);border-color:#FF6B35;color:#FF6B35}
+    .empty{text-align:center;padding:30px;color:rgba(255,255,255,0.3);font-size:13px}
+    .month-selector{background:#070B14;border:0.5px solid rgba(255,255,255,0.08);border-radius:8px;padding:6px 10px;color:#fff;font-size:12px;cursor:pointer}
+    .summary-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid rgba(255,255,255,0.05);font-size:13px}
+    .summary-row:last-child{border:none}
+    .cat-bar{height:4px;border-radius:2px;margin-top:4px}
+    @media(max-width:768px){.kpi{grid-template-columns:repeat(2,1fr)}.main{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login" id="loginScreen">
+  <div class="login-card">
+    <div class="logo">Zan<span>tray</span></div>
+    <div class="sub">💰 Finance Department · Private</div>
+    <input type="password" id="pwdInput" placeholder="Enter password" onkeypress="if(event.key==='Enter')login()"/>
+    <button class="btn" style="width:100%" onclick="login()">Access Finance</button>
+    <div class="error" id="loginError"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app" id="appScreen">
+  <div class="header">
+    <div>
+      <div class="header-title">💰 Zan<span>tray</span> Finance</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.3);margin-top:2px">Zantray Technologies LLC · Private</div>
+    </div>
+    <div class="header-actions">
+      <a href="index.html" class="btn-outline">← CEO Dashboard</a>
+      <button class="btn-outline" onclick="logout()">Log Out</button>
+    </div>
+  </div>
+
+  <!-- KPI CARDS -->
+  <div class="kpi">
+    <div class="kpi-card">
+      <div class="kpi-label">Total Income</div>
+      <div class="kpi-val" id="kpiIncome" style="color:#4CAF50">$0.00</div>
+      <div class="kpi-sub" id="kpiIncomeSub">All time</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Total Expenses</div>
+      <div class="kpi-val" id="kpiExpense" style="color:#FF4444">$0.00</div>
+      <div class="kpi-sub" id="kpiExpenseSub">All time</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Net Balance</div>
+      <div class="kpi-val" id="kpiNet">$0.00</div>
+      <div class="kpi-sub">Income minus expenses</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">This Month</div>
+      <div class="kpi-val" id="kpiMonth">$0.00</div>
+      <div class="kpi-sub" id="kpiMonthSub">Net for current month</div>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- ADD ENTRY FORM -->
+    <div>
+      <div class="panel">
+        <div class="panel-title">Add Entry</div>
+        <div class="type-toggle">
+          <button class="type-btn expense active" id="typeExpense" onclick="setType('expense')">💸 Expense</button>
+          <button class="type-btn income" id="typeIncome" onclick="setType('income')">💰 Income</button>
+        </div>
+        <div class="form-label">AMOUNT (USD)</div>
+        <input type="number" id="amount" placeholder="0.00" min="0" step="0.01" style="margin-bottom:14px"/>
+        <div class="form-label">CATEGORY</div>
+        <select id="category" style="margin-bottom:14px">
+          <option value="">Select category...</option>
+        </select>
+        <div class="form-label">DESCRIPTION</div>
+        <input type="text" id="description" placeholder="e.g. Namecheap domain renewal" style="margin-bottom:14px"/>
+        <div class="form-label">DATE</div>
+        <input type="date" id="entryDate" style="margin-bottom:20px"/>
+        <button class="btn" style="width:100%" onclick="addEntry()" id="addBtn">Add Entry</button>
+      </div>
+
+      <!-- MONTHLY SUMMARY -->
+      <div class="panel" style="margin-top:16px">
+        <div class="panel-title">
+          Monthly Summary
+          <select class="month-selector" id="monthSelector" onchange="renderSummary()"></select>
+        </div>
+        <div id="monthlySummary"></div>
+      </div>
+    </div>
+
+    <!-- ENTRIES LIST -->
+    <div class="panel">
+      <div class="panel-title">
+        Transactions
+        <span id="entryCount" style="font-size:11px;color:rgba(255,255,255,0.3)">0 entries</span>
+      </div>
+      <div class="tabs">
+        <div class="tab active" id="tab-all" onclick="switchTab('all')">All</div>
+        <div class="tab" id="tab-expense" onclick="switchTab('expense')">💸 Expenses</div>
+        <div class="tab" id="tab-income" onclick="switchTab('income')">💰 Income</div>
+      </div>
+      <div id="entriesList"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const BACKEND = 'https://zantray-backend.onrender.com';
+let pwd = '';
+let entries = [];
+let currentType = 'expense';
+let currentTab = 'all';
+
+const EXPENSE_CATEGORIES = ['Domain fees', 'Hosting', 'App Store fees', 'Tools & subscriptions', 'LLC & legal', 'Advertising', 'Other'];
+const INCOME_CATEGORIES = ['App Store revenue', 'Google Play revenue', 'Consulting & client work', 'Affiliate (Amazon)', 'Other'];
+
+function setType(type) {
+  currentType = type;
+  document.getElementById('typeExpense').classList.toggle('active', type === 'expense');
+  document.getElementById('typeIncome').classList.toggle('active', type === 'income');
+  renderCategoryOptions();
+}
+
+function renderCategoryOptions() {
+  const cats = currentType === 'expense' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES;
+  const sel = document.getElementById('category');
+  sel.innerHTML = '<option value="">Select category...</option>' + cats.map(c => `<option value="${c}">${c}</option>`).join('');
+}
+
+async function login() {
+  pwd = document.getElementById('pwdInput').value;
+  if (!pwd) return;
+  try {
+    const res = await fetch(`${BACKEND}/finance/entries?password=${encodeURIComponent(pwd)}`);
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('appScreen').style.display = 'block';
+      entries = data.entries || [];
+      renderCategoryOptions();
+      setDefaultDate();
+      populateMonthSelector();
+      renderAll();
+    } else {
+      document.getElementById('loginError').textContent = '❌ Wrong password.';
+    }
+  } catch(err) {
+    document.getElementById('loginError').textContent = '❌ Could not connect.';
+  }
+}
+
+function logout() {
+  pwd = '';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('appScreen').style.display = 'none';
+  document.getElementById('pwdInput').value = '';
+}
+
+function setDefaultDate() {
+  document.getElementById('entryDate').value = new Date().toISOString().split('T')[0];
+}
+
+async function addEntry() {
+  const amount = parseFloat(document.getElementById('amount').value);
+  const category = document.getElementById('category').value;
+  const description = document.getElementById('description').value.trim();
+  const date = document.getElementById('entryDate').value;
+  if (!amount || amount <= 0) return alert('Please enter a valid amount.');
+  if (!category) return alert('Please select a category.');
+  const btn = document.getElementById('addBtn');
+  btn.textContent = 'Adding...';
+  btn.disabled = true;
+  try {
+    const res = await fetch(`${BACKEND}/finance/add`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pwd, type: currentType, amount, category, description, date })
+    });
+    const data = await res.json();
+    if (data.success) {
+      entries.unshift(data.entry);
+      document.getElementById('amount').value = '';
+      document.getElementById('description').value = '';
+      setDefaultDate();
+      populateMonthSelector();
+      renderAll();
+    } else { alert('Error: ' + (data.error || 'Could not add entry')); }
+  } catch(err) { alert('Could not connect'); }
+  btn.textContent = 'Add Entry';
+  btn.disabled = false;
+}
+
+async function deleteEntry(id) {
+  if (!confirm('Delete this entry?')) return;
+  try {
+    const res = await fetch(`${BACKEND}/finance/${id}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pwd })
+    });
+    const data = await res.json();
+    if (data.success) {
+      entries = entries.filter(e => e._id !== id);
+      renderAll();
+    }
+  } catch(err) { alert('Could not delete'); }
+}
+
+function fmt(amount) {
+  return '$' + Math.abs(amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+function renderAll() {
+  renderKPIs();
+  renderEntries();
+  renderSummary();
+}
+
+function renderKPIs() {
+  const totalIncome = entries.filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0);
+  const totalExpense = entries.filter(e => e.type === 'expense').reduce((s, e) => s + e.amount, 0);
+  const net = totalIncome - totalExpense;
+  const now = new Date();
+  const thisMonth = entries.filter(e => {
+    const d = new Date(e.date);
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  });
+  const monthIncome = thisMonth.filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0);
+  const monthExpense = thisMonth.filter(e => e.type === 'expense').reduce((s, e) => s + e.amount, 0);
+  const monthNet = monthIncome - monthExpense;
+
+  document.getElementById('kpiIncome').textContent = fmt(totalIncome);
+  document.getElementById('kpiExpense').textContent = fmt(totalExpense);
+  document.getElementById('kpiNet').textContent = (net >= 0 ? '+' : '-') + fmt(net);
+  document.getElementById('kpiNet').style.color = net >= 0 ? '#4CAF50' : '#FF4444';
+  document.getElementById('kpiMonth').textContent = (monthNet >= 0 ? '+' : '-') + fmt(monthNet);
+  document.getElementById('kpiMonth').style.color = monthNet >= 0 ? '#4CAF50' : '#FF4444';
+  document.getElementById('kpiMonthSub').textContent = now.toLocaleString('default', { month: 'long', year: 'numeric' });
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(`tab-${tab}`).classList.add('active');
+  renderEntries();
+}
+
+function renderEntries() {
+  const filtered = currentTab === 'all' ? entries : entries.filter(e => e.type === currentTab);
+  document.getElementById('entryCount').textContent = `${filtered.length} entries`;
+  if (filtered.length === 0) {
+    document.getElementById('entriesList').innerHTML = '<div class="empty">No entries yet</div>';
+    return;
+  }
+  document.getElementById('entriesList').innerHTML = filtered.map(e => `
+    <div class="entry-row">
+      <div class="entry-dot" style="background:${e.type === 'income' ? '#4CAF50' : '#FF4444'}"></div>
+      <div class="entry-info">
+        <div class="entry-name">${e.category}</div>
+        <div class="entry-meta">${e.description || '—'} · ${new Date(e.date).toLocaleDateString()}</div>
+      </div>
+      <div class="entry-amount" style="color:${e.type === 'income' ? '#4CAF50' : '#FF4444'}">${e.type === 'income' ? '+' : '-'}${fmt(e.amount)}</div>
+      <button class="entry-delete" onclick="deleteEntry('${e._id}')">🗑️</button>
+    </div>
+  `).join('');
+}
+
+function populateMonthSelector() {
+  const months = [...new Set(entries.map(e => {
+    const d = new Date(e.date);
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+  }))].sort().reverse();
+  const now = new Date();
+  const currentMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  if (!months.includes(currentMonth)) months.unshift(currentMonth);
+  const sel = document.getElementById('monthSelector');
+  const current = sel.value || currentMonth;
+  sel.innerHTML = months.map(m => {
+    const [y, mo] = m.split('-');
+    const label = new Date(y, mo-1).toLocaleString('default', { month: 'long', year: 'numeric' });
+    return `<option value="${m}" ${m === current ? 'selected' : ''}>${label}</option>`;
+  }).join('');
+}
+
+function renderSummary() {
+  const selected = document.getElementById('monthSelector')?.value;
+  if (!selected) return;
+  const [y, mo] = selected.split('-');
+  const monthEntries = entries.filter(e => {
+    const d = new Date(e.date);
+    return d.getFullYear() === parseInt(y) && d.getMonth() === parseInt(mo)-1;
+  });
+  const income = monthEntries.filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0);
+  const expense = monthEntries.filter(e => e.type === 'expense').reduce((s, e) => s + e.amount, 0);
+  const net = income - expense;
+
+  // Category breakdown
+  const expCats = {};
+  monthEntries.filter(e => e.type === 'expense').forEach(e => { expCats[e.category] = (expCats[e.category] || 0) + e.amount; });
+
+  document.getElementById('monthlySummary').innerHTML = `
+    <div class="summary-row"><span style="color:rgba(255,255,255,0.5)">Income</span><span style="color:#4CAF50;font-weight:700">+${fmt(income)}</span></div>
+    <div class="summary-row"><span style="color:rgba(255,255,255,0.5)">Expenses</span><span style="color:#FF4444;font-weight:700">-${fmt(expense)}</span></div>
+    <div class="summary-row" style="border-top:0.5px solid rgba(255,255,255,0.1);margin-top:4px;padding-top:12px"><span style="font-weight:700">Net</span><span style="font-weight:700;color:${net>=0?'#4CAF50':'#FF4444'}">${net>=0?'+':'-'}${fmt(net)}</span></div>
+    ${Object.keys(expCats).length > 0 ? `
+    <div style="margin-top:16px;font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">Expense Breakdown</div>
+    ${Object.entries(expCats).sort((a,b)=>b[1]-a[1]).map(([cat, amt]) => `
+      <div style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
+          <span style="color:rgba(255,255,255,0.6)">${cat}</span>
+          <span style="color:#FF4444">-${fmt(amt)}</span>
+        </div>
+        <div style="height:4px;background:rgba(255,255,255,0.06);border-radius:2px">
+          <div style="height:4px;border-radius:2px;background:#FF4444;width:${Math.min(100,(amt/expense*100)).toFixed(0)}%"></div>
+        </div>
+      </div>
+    `).join('')}` : ''}
+  `;
+}
+</script>
+</body>
+</html>
